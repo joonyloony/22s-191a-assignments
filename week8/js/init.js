@@ -14,14 +14,20 @@ Esri_WorldGrayCanvas.addTo(map)
 let inState = L.featureGroup();
 let outOfState = L.featureGroup();
 let intl = L.featureGroup();
+let undocu =L.featureGroup();
 let countTaxYes = 0;
 let countTaxNo = 0;
+let countin = 0;
+let countout = 0;
+let countintl =0;
+let countundocu=0;
 
 //define layers
 let layers = {
     "In state student": inState,
     "Out of state student": outOfState,
-    "International student": intl
+    "International student": intl,
+    "Undocumented students": undocu
 }
 
 // add layer control box (legend)
@@ -33,31 +39,44 @@ function addMarker(data){
     if(data.student == "In State"){
         inState.addLayer(L.circleMarker([data.lat,data.lng],
             {"radius": 10,
-            "color": "#C66FB3",
+            "color": "pink",
             "weight":5,
             "opacity":500}).addTo(map).
         bindPopup(`<h2>${data.college}</h2> <h3>${data.job}</h3> <h4>${data.how}</h4>`))
         createButtons(data.lat,data.lng,data['student'])
+        countin += 1;
     }
     else if(data.student == "Out of State"){
         outOfState.addLayer(L.circleMarker([data.lat,data.lng],
             {"radius": 10,
-            "color": "#2D3047",
+            "color": "black",
             "weight":5,
             "opacity":500}).addTo(map).
         bindPopup(`<h2>${data.college}</h2> <h3>${data.job}</h3> <h4>${data.how}</h4>`))
         createButtons(data.lat,data.lng,data['student'])
+        countout += 1;
     }
-    else{
+    else if(data.student == "International"){
         intl.addLayer(L.circleMarker([data.lat,data.lng],
             {"radius": 10,
-            "color": "#C66FB3",
+            "color": "cyan",
             "weight":5,
             "opacity":500}).addTo(map).
         bindPopup(`<h2>${data.college}</h2> <h3>${data.job}</h3> <h4>${data.how}</h4>`))
         createButtons(data.lat,data.lng,data['student'])
+      countintl += 1;
     }
-    return
+    else {
+        undocu.addLayer(L.circleMarker([data.lat,data.lng],
+            {"radius": 10,
+            "color": "green",
+            "weight":5,
+            "opacity":500}).addTo(map).
+        bindPopup(`<h2>${data.college}</h2> <h3>${data.job}</h3> <h4>${data.how}</h4>`))
+        createButtons(data.lat,data.lng,data['student'])
+      countundocu += 1;
+    }
+    return countin, countout, countintl, countundocu
 }
 
 function createButtons(lat,lng,title){
@@ -73,21 +92,19 @@ function createButtons(lat,lng,title){
     spaceForButtons.appendChild(newButton);//this adds the button to our page.
 }
 
-const dataUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSgzJYv5patSDAIUAzaoz-tC7pCmrNRCJEopbJlOAVuLnkw0GFzTycLxJCwPh-pQqL4UItpy27X4prg/pub?output=csv"
-
 
 function addChart(){
     // create the new chart here, target the id in the html called "chart"
-    new Chart(document.getElementById("pieChartTaxBracket"), {
-        type: 'pie', //can change to 'bar','line' chart or others
+    new Chart(document.getElementById("chart"), {
+        type: 'bar', //can change to 'bar','line' chart or others
         data: {
             // labels for data here
-        labels: ["Yes", "No"],
+        labels: ["in state","out of state","international"],
         datasets: [
             {
             label: "Count",
-            backgroundColor: ["green", "red"],
-            data: [countTaxYes,countTaxNo]
+            backgroundColor: ["green", "red", "blue"],
+            data: [countin,countout,countintl]
             }
         ]
         },
@@ -97,11 +114,14 @@ function addChart(){
             legend: { display: true },
             title: {
                 display: true,
-                text: 'Are the Current Tax Brackets Fair?'
+                text: 'Survey Respondants'
             }
         }
     });
 }
+
+
+const dataUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSgzJYv5patSDAIUAzaoz-tC7pCmrNRCJEopbJlOAVuLnkw0GFzTycLxJCwPh-pQqL4UItpy27X4prg/pub?output=csv"
 
 function loadData(url){
     Papa.parse(url, {
@@ -128,7 +148,7 @@ function processData(results){
     outOfState.addTo(map)
     intl.addTo(map)
     addChart()
-};
+}
 
 
 
